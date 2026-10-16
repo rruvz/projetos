@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gerador de prompts para sites</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--bg:#f7f9fa;--card:#fff;--ink:#1c2a33;--mut:#5a6b76;--line:#d5dee3;--acc:#1b6b86;--acc-t:#fff;--soft:#e6f0f4;--warn:#fff4dc;--warn-t:#6b4a05;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12191e;--card:#1a242b;--ink:#e6eef2;--mut:#9fb0ba;--line:#33444e;--acc:#6cc0dc;--acc-t:#0b1b22;--soft:#1f3139;--warn:#3a2f12;--warn-t:#f2d88f;color-scheme:dark}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:1.6rem;margin:0 0 4px}h2{font-size:1.15rem;margin:0 0 6px}
+p{margin:0 0 12px}.mut{color:var(--mut)}
+.aviso{background:var(--warn);color:var(--warn-t);border-radius:8px;padding:10px 14px;margin:16px 0;font-size:.95rem}
+.tabs{display:flex;gap:8px;margin:16px 0}
+.tabs button{flex:1;padding:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:inherit;font-weight:700;cursor:pointer}
+.tabs button[aria-selected="true"]{border-color:var(--acc);background:var(--soft)}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+label{display:block;font-weight:700;margin:14px 0 2px}
+.dica{display:block;font-weight:400;color:var(--mut);font-size:.9rem}
+textarea,input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:92px;resize:vertical}
+button.p,button.s{padding:11px 18px;border-radius:8px;font:inherit;font-weight:700;cursor:pointer;margin:16px 8px 0 0}
+button.p{background:var(--acc);color:var(--acc-t);border:0}
+button.s{background:transparent;color:var(--ink);border:2px solid var(--line)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.falta{background:var(--soft);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:.95rem}
+#saida,#saidaC{min-height:320px;font:14px/1.5 ui-monospace,Consolas,monospace}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Gerador de prompts para sites</h1>
+<p class="mut">Conte o que você quer e receba um texto pronto para colar no ChatGPT, Claude ou Gemini.</p>
+<div class="aviso"><b>Sem IA nesta versão.</b> Os prompts são montados pelo formulário: o que você escreve é encaixado em um modelo fixo. Nenhuma IA lê ou escreve nada, e o seu texto não é enviado para lugar nenhum.</div>
+<div class="tabs" role="tablist">
+<button role="tab" id="t1" aria-selected="true">Criar prompt</button>
+<button role="tab" id="t2" aria-selected="false">Corrigir um site</button>
+</div>
+
+<div id="criar">
+<section class="card" id="c1">
+<h2>1. Descreva o site que você quer</h2>
+<p class="mut">Escreva do seu jeito, como se explicasse para um amigo.</p>
+<textarea id="desc" placeholder="Ex.: um site simples para divulgar meu trabalho de fotografia"></textarea>
+<button class="p" id="ir2">Continuar</button>
+</section>
+
+<section class="card" id="c2" hidden>
+<h2>2. Algumas perguntas rápidas</h2>
+<p class="mut">Responda só o que souber. O que ficar em branco <b>não será inventado</b>: o prompt vai pedir que a IA pergunte antes.</p>
+<label for="publico">Para quem é o site?</label><input id="publico">
+<label for="objetivo">O que as pessoas devem fazer no site?<span class="dica">Ex.: entrar em contato, ver fotos, comprar, saber um horário</span></label><input id="objetivo">
+<label for="paginas">Quais páginas ou partes ele deve ter?</label><input id="paginas">
+<label for="infos">Informações reais que devem aparecer<span class="dica">Nome, telefone, endereço, textos. Escreva só o que for verdadeiro.</span></label><textarea id="infos"></textarea>
+<label for="visual">Como você imagina o visual?<span class="dica">Cores, clima, sites que você gosta</span></label><input id="visual">
+<label for="tec">Tecnologia</label>
+<select id="tec"><option value="">Não sei: a IA deve sugerir a opção mais simples e explicar por quê</option><option value="html">Só HTML, CSS e JavaScript, em um único arquivo</option><option value="outra">Já tenho uma ferramenta em mente (escrevo abaixo)</option></select>
+<label for="extra">Algo que NÃO deve ter, ou outra observação</label><input id="extra">
+<button class="p" id="gerar">Gerar prompt</button><button class="s" id="volta1">Voltar</button>
+</section>
+
+<section class="card" id="c3" hidden>
+<h2>3. Seu prompt está pronto</h2>
+<p class="aviso"><b>Montado pelo formulário, sem IA.</b> Revise o texto antes de usar. Você pode editar as respostas e gerar de novo.</p>
+<div class="falta" id="falta"></div>
+<textarea id="saida" readonly></textarea>
+<button class="p" id="copiar">Copiar prompt</button><button class="s" id="refaz">Editar respostas</button><button class="s" id="novo">Começar de novo</button>
+<p class="mut" id="okc" role="status"></p>
+</section>
+</div>
+
+<div id="corrigir" hidden>
+<section class="card">
+<h2>Corrigir um site que deu problema</h2>
+<p class="mut">Explique o que aconteceu. O prompt de correção vai pedir à IA para mexer o mínimo possível.</p>
+<label for="site">Que site você pediu?</label><textarea id="site"></textarea>
+<label for="erro">O que deu errado?<span class="dica">Conte o que você esperava e o que aconteceu</span></label><textarea id="erro"></textarea>
+<label for="msg">Mensagem de erro, se aparecer<span class="dica">Copie e cole exatamente como está</span></label><textarea id="msg"></textarea>
+<label for="funciona">O que já funciona e não pode mudar?</label><textarea id="funciona"></textarea>
+<button class="p" id="gerarC">Gerar prompt de correção</button>
+<div id="resC" hidden><p class="aviso"><b>Montado pelo formulário, sem IA.</b> Nenhuma IA analisou o seu problema: o texto abaixo só organiza o que você escreveu.</p><div class="falta" id="faltaC"></div><textarea id="saidaC" readonly></textarea>
+<button class="p" id="copiarC">Copiar prompt</button><p class="mut" id="okC" role="status"></p></div>
+</section>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id),v=id=>$(id).value.trim();
+function aba(n){$("criar").hidden=n!==1;$("corrigir").hidden=n!==2;$("t1").setAttribute("aria-selected",n===1);$("t2").setAttribute("aria-selected",n===2)}
+$("t1").onclick=()=>aba(1);$("t2").onclick=()=>aba(2);
+function passo(n){["c1","c2","c3"].forEach((x,i)=>$(x).hidden=i+1!==n)}
+$("ir2").onclick=()=>{if(!v("desc")){$("desc").focus();$("desc").placeholder="Escreva pelo menos uma frase sobre o site";return}passo(2)};
+$("volta1").onclick=()=>passo(1);$("refaz").onclick=()=>passo(2);
+$("novo").onclick=()=>{document.querySelectorAll("#criar textarea,#criar input").forEach(e=>e.value="");$("tec").value="";passo(1)};
+$("gerar").onclick=()=>{
+ const campos=[["publico","Público"],["objetivo","Objetivo do site"],["paginas","Páginas ou partes"],["infos","Informações reais que devem aparecer"],["visual","Visual"]];
+ const sei=[],nao=[];
+ campos.forEach(([id,nome])=>v(id)?sei.push("- "+nome+": "+v(id)):nao.push(nome.toLowerCase()));
+ if(v("extra"))sei.push("- Observação ou o que não deve ter: "+v("extra"));
+ const t=$("tec").value;
+ const tec=t==="html"?"Use somente HTML, CSS e JavaScript, em um único arquivo.":t==="outra"?"Tenho uma ferramenta em mente (veja a observação acima). Se ela não servir ao que descrevi, me avise.":"Não escolhi tecnologia. Sugira a opção mais simples que resolva o que descrevi e explique em uma frase por que ela basta.";
+ let p="Você vai me ajudar a criar um site. Sou iniciante: explique tudo em português simples, sem termos técnicos.\n\n## O que eu quero\n"+v("desc")+"\n\n## O que eu já sei\n"+(sei.length?sei.join("\n"):"- Ainda não defini detalhes.")+"\n\n";
+ if(nao.length)p+="## O que eu ainda não sei\n"+nao.map(x=>"- "+x).join("\n")+"\nAntes de criar o site, me faça perguntas simples sobre esses pontos (no máximo 5 por vez) e espere minhas respostas.\n\n";
+ p+="## Tecnologia\n"+tec+"\n\n## Regras\n- Não invente nomes, textos, preços, endereços, contatos ou depoimentos. Onde faltar informação real, deixe o espaço marcado como [PREENCHER].\n- Não adicione tecnologia, biblioteca ou recurso só por ser popular. Use apenas o que o site precisa.\n- Se o site precisar de algo além do que descrevi (como login, banco de dados ou pagamentos), pergunte antes de incluir.\n- No final, explique como eu vejo o site funcionando e liste o que você assumiu.";
+ $("saida").value=p;
+ $("falta").textContent=nao.length?"Você não respondeu: "+nao.join(", ")+". O prompt manda a IA perguntar sobre isso em vez de inventar.":"Você respondeu tudo. Mesmo assim, o prompt pede que a IA pergunte se algo ficar confuso.";
+ passo(3)};
+$("gerarC").onclick=()=>{
+ if(!v("erro")){$("erro").focus();return}
+ const nf=[];if(!v("site"))nf.push("qual é o site");if(!v("funciona"))nf.push("o que já funciona");
+ let p="Meu site tem um problema e preciso que você o corrija sem estragar o que já funciona. Sou iniciante: explique tudo em português simples.\n\n## O site\n"+(v("site")||"Não descrevi. Pergunte-me o que for necessário.")+"\n\n## O problema\n"+v("erro")+"\n\n";
+ if(v("msg"))p+="## Mensagem de erro (copiada sem alterações)\n```\n"+v("msg")+"\n```\n\n";
+ p+="## O que já funciona e NÃO deve mudar\n"+(v("funciona")||"Não informei. Na dúvida, não mexa em nada que não tenha relação direta com o problema e me pergunte.")+"\n\n## Como quero que você trabalhe\n1. Explique, em poucas palavras e sem termos técnicos, a causa provável do problema. Se não tiver certeza, diga isso e me faça uma pergunta.\n2. Faça a menor mudança possível. Não reescreva o site inteiro nem altere visual, textos ou estrutura que não fazem parte do problema.\n3. Mostre exatamente o que mudou e o que ficou igual.\n4. Diga como posso testar se o problema foi resolvido.\n5. Se faltar alguma informação, pergunte antes de alterar.";
+ $("saidaC").value=p;$("resC").hidden=false;
+ $("faltaC").textContent=nf.length?"Faltou dizer: "+nf.join(" e ")+". O prompt pede que a IA pergunte antes de mexer.":"Prompt montado com o que você informou.";$("resC").scrollIntoView({behavior:"smooth"})};
+function copia(areaId,msgId){const a=$(areaId);a.select();let ok=false;
+ try{navigator.clipboard.writeText(a.value);ok=true}catch(e){}
+ try{ok=document.execCommand("copy")||ok}catch(e){}
+ $(msgId).textContent=ok?"Copiado! Agora cole na sua IA.":"Não consegui copiar sozinho. O texto está selecionado: use Ctrl+C (ou Copiar no celular)."}
+$("copiar").onclick=()=>copia("saida","okc");$("copiarC").onclick=()=>copia("saidaC","okC");
+</script>
+</body>
+</html>
